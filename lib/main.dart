@@ -1,7 +1,25 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-void main() {
-  runApp(MyApp());
+import 'package:desktop_window/desktop_window.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spotify_ui/data/data.dart';
+import 'package:flutter_spotify_ui/models/current_track_model.dart';
+import 'package:flutter_spotify_ui/screens/playlist_screen.dart';
+import 'package:flutter_spotify_ui/widgets/widgets.dart';
+import 'package:provider/provider.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
+    await DesktopWindow.setMinWindowSize(const Size(600, 800));
+  }
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CurrentTrackModel(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +34,6 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF121212),
         backgroundColor: const Color(0xFF121212),
         primaryColor: Colors.black,
-        accentColor: const Color(0xFF1DB954),
         iconTheme: const IconThemeData().copyWith(color: Colors.white),
         fontFamily: 'Montserrat',
         textTheme: TextTheme(
@@ -42,8 +59,34 @@ class MyApp extends StatelessWidget {
             letterSpacing: 1.0,
           ),
         ),
+        // colorScheme: ColorScheme.fromSwatch()
+        //     .copyWith(secondary: const Color(0xFF1DB954)),
       ),
-      home: Scaffold(),
+      home: Shell(),
+    );
+  }
+}
+
+class Shell extends StatelessWidget {
+  const Shell({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                if (MediaQuery.of(context).size.width > 800) SideMenu(),
+                const Expanded(
+                    child: PlaylistScreen(playlist: lofihiphopPlaylist)),
+              ],
+            ),
+          ),
+          CurrentTrack(),
+        ],
+      ),
     );
   }
 }
